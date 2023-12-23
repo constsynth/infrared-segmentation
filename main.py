@@ -15,11 +15,10 @@ def upload_model(path_to_model: str = None, device: str = 'cuda'):
     model = YOLO(path_to_model).to(device)
     return model
 
-def estimate_speed(point_1, point_2):
+def estimate_speed(point_1, point_2, ppm_rate: int = 8, fps: int = 15) -> int:
     d_pixel = dist(point_1, point_2)
-    ppm = 8
-    d_meters = d_pixel/ppm
-    time_constant = 15*3.6
+    d_meters = d_pixel/ppm_rate
+    time_constant = fps*3.6
     speed = d_meters * time_constant
     return int(speed)
 
@@ -45,7 +44,7 @@ def tracking(rtsp_address: str = None, path_to_model: str = None):
                 track = track_history[track_id]
                 track.append((int(x), int(y)))
                 if len(track) >= 2:
-                    speed = estimate_speed(track[-1], track[-2])
+                    speed = estimate_speed(track[-1], track[-2], ppm_rate=16)
                     cv2.putText(annotated_frame, f'{speed} km/h', track[-1], font, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 if len(track) > 50:
                     track.pop(0)
@@ -61,6 +60,7 @@ def tracking(rtsp_address: str = None, path_to_model: str = None):
             break
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     tracking(rtsp_address='30 Minutes of Cars Driving By in 2009.mp4', path_to_model='./yolov8s-seg.pt')
