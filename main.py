@@ -1,5 +1,4 @@
 import cv2
-from PIL import Image
 import numpy as np
 from collections import defaultdict
 from ultralytics import YOLO
@@ -7,13 +6,15 @@ import os
 import torch
 from math import dist
 
-
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 print(torch.cuda.is_available())
 font = cv2.FONT_HERSHEY_SIMPLEX
+
 
 def upload_model(path_to_model: str = None, device: str = 'cuda'):
     model = YOLO(path_to_model).to(device)
     return model
+
 
 def estimate_speed(point_1, point_2, ppm_rate: int = 8, fps: int = 15) -> int:
     d_pixel = dist(point_1, point_2)
@@ -21,6 +22,7 @@ def estimate_speed(point_1, point_2, ppm_rate: int = 8, fps: int = 15) -> int:
     time_constant = fps*3.6
     speed = d_meters * time_constant
     return int(speed)
+
 
 def tracking(rtsp_address: str = None, path_to_model: str = None):
     model = upload_model(path_to_model)
@@ -65,4 +67,4 @@ def tracking(rtsp_address: str = None, path_to_model: str = None):
 
 
 if __name__ == "__main__":
-    tracking(rtsp_address='people_thermal.mp4', path_to_model='./trained_detection/best.pt')
+    tracking(rtsp_address='infrared_for_test.mp4', path_to_model='best.pt')
